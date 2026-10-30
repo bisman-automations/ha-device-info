@@ -1,0 +1,13 @@
+{
+  "domain": "device_info",
+  "name": "Device Info",
+  "codeowners": [
+    "@donavanbecker"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/bisman-automations/ha-device-info",
+  "integration_type": "service",
+  "iot_class": "calculated",
+  "issue_tracker": "https://github.com/bisman-automations/ha-device-info/issues",
+  "version": "1.0.0"
+}

@@ -1,0 +1,84 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Device Info",
+        "description": "Device Info fills in or corrects a device's manufacturer, model, versions and serial number, for example when the device list shows unknown. After setup, choose Add device on the Device Info entry."
+      }
+    },
+    "abort": {
+      "already_configured": "Device Info is already set up. Add devices from its entry."
+    }
+  },
+  "config_subentries": {
+    "override": {
+      "entry_type": "Device",
+      "initiate_flow": {
+        "user": "Add device",
+        "reconfigure": "Edit details"
+      },
+      "step": {
+        "user": {
+          "title": "Choose a device",
+          "description": "Choose the device whose details you want to fill in or correct.",
+          "data": {
+            "device_id": "Device"
+          }
+        },
+        "details": {
+          "title": "Details for {device_name}",
+          "description": "Type the details {device_name} should show. Blank fields keep what its integration sets.",
+          "data": {
+            "manufacturer": "Manufacturer",
+            "model": "Model",
+            "model_id": "Model ID",
+            "hw_version": "Hardware version",
+            "sw_version": "Firmware version",
+            "serial_number": "Serial number",
+            "keep": "Keep these even when the device's integration sets its own"
+          },
+          "data_description": {
+            "manufacturer": "From the device's integration: {original_manufacturer}. Leave blank to keep it.",
+            "model": "From the device's integration: {original_model}. Leave blank to keep it.",
+            "model_id": "From the device's integration: {original_model_id}. Leave blank to keep it.",
+            "hw_version": "From the device's integration: {original_hw_version}. Leave blank to keep it.",
+            "sw_version": "From the device's integration: {original_sw_version}. Leave blank to keep it.",
+            "serial_number": "From the device's integration: {original_serial_number}. Leave blank to keep it.",
+            "keep": "Off: your value fills in what the integration leaves blank, and the integration wins if it sets one later. On: your value always wins and is put back whenever the integration changes it."
+          }
+        },
+        "reconfigure": {
+          "title": "Details for {device_name}",
+          "description": "Type the details {device_name} should show. Blank fields keep what its integration sets. To put back everything the integration set, delete this device from Device Info instead.",
+          "data": {
+            "manufacturer": "Manufacturer",
+            "model": "Model",
+            "model_id": "Model ID",
+            "hw_version": "Hardware version",
+            "sw_version": "Firmware version",
+            "serial_number": "Serial number",
+            "keep": "Keep these even when the device's integration sets its own"
+          },
+          "data_description": {
+            "manufacturer": "From the device's integration: {original_manufacturer}. Leave blank to keep it.",
+            "model": "From the device's integration: {original_model}. Leave blank to keep it.",
+            "model_id": "From the device's integration: {original_model_id}. Leave blank to keep it.",
+            "hw_version": "From the device's integration: {original_hw_version}. Leave blank to keep it.",
+            "sw_version": "From the device's integration: {original_sw_version}. Leave blank to keep it.",
+            "serial_number": "From the device's integration: {original_serial_number}. Leave blank to keep it.",
+            "keep": "Off: your value fills in what the integration leaves blank, and the integration wins if it sets one later. On: your value always wins and is put back whenever the integration changes it."
+          }
+        }
+      },
+      "error": {
+        "nothing_set": "Fill in at least one detail.",
+        "device_not_found": "That device is no longer in Home Assistant."
+      },
+      "abort": {
+        "already_configured": "Device Info already has this device. Edit it from its entry instead.",
+        "device_not_found": "That device is no longer in Home Assistant.",
+        "reconfigure_successful": "Saved."
+      }
+    }
+  }
+}

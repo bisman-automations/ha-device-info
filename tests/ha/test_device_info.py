@@ -97,7 +97,7 @@ async def test_set_up_once(hass) -> None:
     result = await hass.config_entries.flow.async_init(
         DOMAIN, context={"source": SOURCE_USER}
     )
-    assert result["reason"] == "already_configured"
+    assert result["reason"] == "single_instance_allowed"
 
 
 async def test_fill_in_unknown_details_and_restore_them(hass) -> None:

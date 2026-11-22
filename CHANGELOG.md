@@ -5,6 +5,16 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.4] - 2026-11-22
+
+### Fixed
+
+- **Devices that come back get your details again.** When you delete a device and its integration adds it back, Home Assistant gives it the same identity. Device Info now puts your values on it straight away, instead of only after Home Assistant restarts.
+
+### Changed
+
+- **Less work when other devices change.** Device Info now only looks at updates of the devices you changed, and ignores every other device in your home.
+
 ## [1.0.3] - 2026-11-21
 
 ### Changed
@@ -32,6 +42,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Keep your values, or let the integration win.** By default your values fill in what the integration leaves blank, and the integration's own value wins if it sets one later. Turn on **Keep these** to put your values back whenever the integration changes them.
 - **Undo at any time.** Removing a device from Device Info, or clearing a field, puts back what the integration had set. Removing Device Info itself puts back every device.
 
+[1.0.4]: https://github.com/bisman-automations/ha-device-info/compare/v1.0.3...v1.0.4
 [1.0.3]: https://github.com/bisman-automations/ha-device-info/compare/v1.0.2...v1.0.3
 [1.0.2]: https://github.com/bisman-automations/ha-device-info/compare/v1.0.1...v1.0.2
 [1.0.1]: https://github.com/bisman-automations/ha-device-info/compare/v1.0.0...v1.0.1

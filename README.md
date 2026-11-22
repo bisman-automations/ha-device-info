@@ -68,6 +68,8 @@ Device Info is added once. Each device you change is listed under it.
    - **Off** (the default): your values fill in what the integration leaves blank. If the integration sets its own value later, for example after an update, its value wins.
    - **On**: your values always win. If the integration writes its own value, usually when Home Assistant starts or the integration reloads, Device Info puts yours back straight away.
 
+If you delete a device from Home Assistant and its integration adds it back later, Device Info puts your values on it again straight away.
+
 The device's page and the device list show your values from then on.
 
 ## Editing and undoing

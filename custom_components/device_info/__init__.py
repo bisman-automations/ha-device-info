@@ -8,6 +8,7 @@ that should be kept, and restores the original values when a change is removed.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -119,6 +120,8 @@ class DeviceInfoRuntime:
         self._store: Store[dict[str, Any]] = Store(hass, STORAGE_VERSION, STORAGE_KEY)
         # device id -> {"applied": {field: value}, "original": {field: value}}
         self.records: dict[str, dict[str, dict[str, Any]]] = {}
+        # Devices with a change, so registry updates of other devices are skipped.
+        self._device_ids: set[str] = set()
         self._unsub: Any = None
 
     async def async_start(self) -> None:
@@ -135,7 +138,9 @@ class DeviceInfoRuntime:
             }
         await self.async_reconcile()
         self._unsub = self.hass.bus.async_listen(
-            dr.EVENT_DEVICE_REGISTRY_UPDATED, self._device_updated
+            dr.EVENT_DEVICE_REGISTRY_UPDATED,
+            self._device_updated,
+            event_filter=self._wanted_event,
         )
 
     @callback
@@ -148,6 +153,7 @@ class DeviceInfoRuntime:
         """Make every device match its change, and undo removed ones."""
         registry = dr.async_get(self.hass)
         overrides = overrides_of(self.entry)
+        self._device_ids = set(overrides)
         changed = False
         for device_id in list(self.records):
             wanted = overrides.get(device_id, {}).get("fields", {})
@@ -194,16 +200,24 @@ class DeviceInfoRuntime:
         return True
 
     @callback
+    def _wanted_event(self, event_data: Mapping[str, Any]) -> bool:
+        """Only a device with a change, created again or with a field rewritten."""
+        if event_data.get("device_id") not in self._device_ids:
+            return False
+        action = event_data.get("action")
+        if action == "create":
+            # A removed device Home Assistant restored keeps its id.
+            return True
+        return action == "update" and bool(
+            set(event_data.get("changes") or {}) & set(FIELDS)
+        )
+
+    @callback
     def _device_updated(self, event: Event) -> None:
-        """The device's integration rewrote it: put kept values back."""
-        if event.data.get("action") != "update":
-            return
+        """The device's integration rewrote or re-added it: put the values back."""
         device_id = event.data.get("device_id")
-        changes = event.data.get("changes") or {}
-        if not isinstance(device_id, str) or not set(changes) & set(FIELDS):
-            return
         overrides = overrides_of(self.entry)
-        if device_id not in overrides:
+        if not isinstance(device_id, str) or device_id not in overrides:
             return
         if self._apply(dr.async_get(self.hass), device_id, overrides):
             self.hass.async_create_task(self._save())

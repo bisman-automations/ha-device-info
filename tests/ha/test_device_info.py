@@ -1,7 +1,10 @@
 """Device Info: filling in, keeping and restoring a device's details."""
 
+from unittest.mock import patch
+
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.device_info import overrides_of
 from custom_components.device_info.const import (
     CONF_DEVICE_ID,
     CONF_KEEP,
@@ -214,3 +217,49 @@ async def test_removing_device_info_restores_everything(hass) -> None:
     assert await hass.config_entries.async_remove(entry.entry_id)
     await hass.async_block_till_done()
     assert dr.async_get(hass).async_get(device.id).manufacturer is None
+
+
+async def test_a_removed_device_added_back_gets_its_details_again(hass) -> None:
+    """Home Assistant restores a removed device with the same id."""
+    entry = await _setup(hass)
+    device = _routine(hass)
+    await _add(hass, entry, device, manufacturer="SwitchBot", keep=False)
+    registry = dr.async_get(hass)
+    (config_entry_id,) = (
+        e.entry_id for e in hass.config_entries.async_entries("other_integration")
+    )
+    registry.async_remove_device(device.id)
+    await hass.async_block_till_done()
+    again = registry.async_get_or_create(
+        config_entry_id=config_entry_id,
+        identifiers={("other_integration", "thing")},
+        name="Boy's Bedroom Curtains",
+    )
+    await hass.async_block_till_done()
+    assert again.id == device.id
+    assert registry.async_get(device.id).manufacturer == "SwitchBot"
+
+
+async def test_other_devices_changing_are_not_looked_at(hass) -> None:
+    """Registry updates of devices without a change skip the work."""
+    entry = await _setup(hass)
+    device = _routine(hass)
+    await _add(hass, entry, device, manufacturer="SwitchBot", keep=True)
+    other_config = MockConfigEntry(domain="another")
+    other_config.add_to_hass(hass)
+    registry = dr.async_get(hass)
+    other = registry.async_get_or_create(
+        config_entry_id=other_config.entry_id,
+        identifiers={("another", "lamp")},
+        name="Lamp",
+    )
+    with patch(
+        "custom_components.device_info.overrides_of", wraps=overrides_of
+    ) as walked:
+        registry.async_update_device(other.id, manufacturer="Acme")
+        await hass.async_block_till_done()
+        assert not walked.called
+        registry.async_update_device(device.id, manufacturer="Acme")
+        await hass.async_block_till_done()
+        assert walked.called
+    assert registry.async_get(device.id).manufacturer == "SwitchBot"
